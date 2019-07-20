@@ -321,15 +321,13 @@ int main(int argc, char* argv[], char* const envp[])
     	}
 
 		i_filename = result["input"].as<std::string>();
-		o_filename = result["input"].as<std::string>();
+		o_filename = result["output"].as<std::string>();
   	}
 	catch (const cxxopts::OptionException& e) 
 	{
     	std::cout << "error parsing options: " << e.what() << std::endl;
     	exit(1);
   	}
-
-	std::cout << flagRemoveEditorMarker;
 
 	NifFile nif;	
 	nif.Load(i_filename);
