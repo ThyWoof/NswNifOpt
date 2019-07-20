@@ -343,6 +343,7 @@ int main(int argc, char* argv[], char* const envp[])
 	bool flagIsHeadPart = false;
 	bool flagNoRemoveParallax = false;
 	bool flagNoCalcBounds = false;
+	bool flagForceOptimization = false;
 
 	cxxopts::Options options(argv[0], "Zappastuff's Nintendo Switch Skyrim NIF optimizer");
 
@@ -376,6 +377,7 @@ int main(int argc, char* argv[], char* const envp[])
 				("is-head-part", "ONLY for parts like head, ear, mouth and hair", cxxopts::value<bool>(flagIsHeadPart))
 				("no-remove-parallax", "don't remove parallax flags and meshes", cxxopts::value<bool>(flagNoRemoveParallax))
 				("no-calc-bounds", "don't calculate new bounds spheres for meshes", cxxopts::value<bool>(flagNoCalcBounds))
+				("force-optimization", "force optimization if NIF on SSE format", cxxopts::value<bool>(flagForceOptimization))
 
 				("i,input", "input file", cxxopts::value<std::string>())
 				("o,output", "ouptput file", cxxopts::value<std::string>());
@@ -466,8 +468,12 @@ int main(int argc, char* argv[], char* const envp[])
 		std::cout << "optmizing for SSE..." << std::endl;
 		if(version.Stream() == 83)
 			OptimizeForSSE(nif, flagIsHeadPart, !flagNoRemoveParallax, !flagNoCalcBounds);
-		else
-			std::cout << "skipping optimization. File is already SSE." << std::endl;
+		else if(flagForceOptimization) {
+			std::cout << "forcing optimization. File is already on SSE format." << std::endl;
+			OptimizeForSSE(nif, flagIsHeadPart, !flagNoRemoveParallax, !flagNoCalcBounds);
+		} else {
+			std::cout << "skipping optimization. File is already on SSE format." << std::endl;	
+		}
 	}
 
 	nif.Save(o_filename);
