@@ -2,7 +2,7 @@
 nswnifopt: remove editor markers and optimize for SSE.
 Copyright (c) 2019 Thy Woof
 
-Optimize NIF function from https://github.com/ousnius/BodySlide-and-Outfit-Studio
+OptimizeForSSE function from https://github.com/ousnius/BodySlide-and-Outfit-Studio
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ void RemoveEditorMarker(NifFile& nif)
 {
 	for (auto &shape : nif.GetShapes()) {
 		std::string shapeName = shape->GetName();
-
 		if (shapeName == "EditorMarker") {
 			printf("Found an editor marker. Deleting...\n");
 			nif.DeleteShape(shape);
@@ -33,7 +32,34 @@ void RemoveEditorMarker(NifFile& nif)
 	}
 }
 
-void OptimizeNIF(NifFile& nif, bool headParts = false, bool removeParallax = true, bool calcBounds = true)
+void MirrorShape(NifFile& nif, bool mirrorX, bool mirrorY, bool mirrorZ)
+{
+	for (auto &shape : nif.GetShapes())
+		nif.MirrorShape(shape, mirrorX, mirrorY, mirrorZ);
+}
+
+void RotateShape(NifFile& nif, float angleX, float angleY, float angleZ)
+{
+	Vector3 angle = Vector3(angleX, angleY, angleZ);
+	for (auto &shape : nif.GetShapes())
+		nif.RotateShape(shape, angle);
+}
+
+void ScaleShape(NifFile& nif, float scaleX, float scaleY, float scaleZ)
+{
+	Vector3 scale = Vector3(scaleX, scaleY, scaleZ);
+	for (auto &shape : nif.GetShapes())
+		nif.ScaleShape(shape, scale);
+}
+
+void OffsetShape(NifFile& nif, float distanceX, float distanceY, float distanceZ)
+{
+	Vector3 offset = Vector3(distanceX, distanceY, distanceZ);
+	for (auto &shape : nif.GetShapes())
+		nif.OffsetShape(shape, offset);
+}
+
+void OptimizeForSSE(NifFile& nif, bool headParts = false, bool removeParallax = true, bool calcBounds = true)
 {
 	NiHeader& hdr = nif.GetHeader();
 	NiVersion& version = hdr.GetVersion();
@@ -291,10 +317,32 @@ int main(int argc, char* argv[], char* const envp[])
 	std::string i_filename;
 	std::string o_filename;
 	bool flagRemoveEditorMarker = false;
-	bool flagOptimizeNIF = false;
+	bool flagPrettySortBlocks = false;
+	bool flagTrimTexturesPath = false;
+
+	bool flagMirrorShapeX = false;
+	bool flagMirrorShapeY = false;
+	bool flagMirrorShapeZ = false;
+
+	bool flagOptimizeForSSE = false;
 	bool flagIsHeadPart = false;
 	bool flagNoRemoveParallax = false;
 	bool flagNoCalcBounds = false;
+
+	bool flagRotateShape = false;
+	float rotateAngleX = 0.0f;
+	float rotateAngleY = 0.0f;
+	float rotateAngleZ = 0.0f;
+
+	bool flagScaleShape = false;
+	float scaleFactorX = 0.0f;
+	float scaleFactorY = 0.0f;
+	float scaleFactorZ = 0.0f;
+
+	bool flagOffsetShape = false;
+	float offsetDistanceX = 0.0f;
+	float offsetDistanceY = 0.0f;
+	float offsetDistanceZ = 0.0f;
 
 	cxxopts::Options options(argv[0], "Zappastuff's Nintendo Switch Skyrim NIF optimizer");
 
@@ -304,11 +352,31 @@ int main(int argc, char* argv[], char* const envp[])
 			.positional_help("[optional args]")
       		.show_positional_help()
 			.add_options()
-				("remove-editor-marker", "Remove Editor Marker", cxxopts::value<bool>(flagRemoveEditorMarker))
-				("optimize-nif", "optimize NIFs", cxxopts::value<bool>(flagOptimizeNIF))				
-				("is-head-part", "NIF is a head part", cxxopts::value<bool>(flagIsHeadPart))
-				("no-remove-parallax", "don't remove parallax on NIF optimize", cxxopts::value<bool>(flagNoRemoveParallax))
-				("no-calc-bounds", "don't calc bounds on NIF optimize", cxxopts::value<bool>(flagNoCalcBounds))
+				("remove-editor-marker", "remove Editor Marker", cxxopts::value<bool>(flagRemoveEditorMarker))
+				("pretty-sort-blocks", "pretty sort blocks", cxxopts::value<bool>(flagPrettySortBlocks))
+				("trim-textures-path", "pretty sort blocks", cxxopts::value<bool>(flagTrimTexturesPath))
+
+				("mirror-shape-x", "mirror shape over x axis", cxxopts::value<bool>(flagMirrorShapeX))
+				("mirror-shape-y", "mirror shape over y axis", cxxopts::value<bool>(flagMirrorShapeY))
+				("mirror-shape-z", "mirror shape over z axis", cxxopts::value<bool>(flagMirrorShapeZ))
+
+				("rotate-shape-x", "rotate shape over x axis by ARG angle", cxxopts::value<float>(rotateAngleX))
+				("rotate-shape-y", "rotate shape over y axis by ARG angle", cxxopts::value<float>(rotateAngleY))
+				("rotate-shape-z", "rotate shape over z axis by ARG angle", cxxopts::value<float>(rotateAngleZ))
+
+				("scale-shape-x", "scale shape on x axis by factor ARG", cxxopts::value<float>(scaleFactorX))
+				("scale-shape-y", "scale shape on y axis by factor ARG", cxxopts::value<float>(scaleFactorY))
+				("scale-shape-z", "scale shape on z axis by factor ARG", cxxopts::value<float>(scaleFactorZ))
+
+				("offset-shape-x", "offset shape over x axis by ARG distance", cxxopts::value<float>(offsetDistanceX))
+				("offset-shape-y", "offset shape over y axis by ARG distance", cxxopts::value<float>(offsetDistanceY))
+				("offset-shape-z", "offset shape over z axis by ARG distance", cxxopts::value<float>(offsetDistanceZ))
+
+				("optimize-for-sse", "optimize NIF for SSE (modifiers below)", cxxopts::value<bool>(flagOptimizeForSSE))				
+				("is-head-part", "ONLY for parts like head, ear, mouth and hair", cxxopts::value<bool>(flagIsHeadPart))
+				("no-remove-parallax", "don't remove parallax flags and meshes", cxxopts::value<bool>(flagNoRemoveParallax))
+				("no-calc-bounds", "don't calculate new bounds spheres for meshes", cxxopts::value<bool>(flagNoCalcBounds))
+
 				("i,input", "input file", cxxopts::value<std::string>())
 				("o,output", "ouptput file", cxxopts::value<std::string>());
 
@@ -320,7 +388,19 @@ int main(int argc, char* argv[], char* const envp[])
       		exit(1);
     	}
 
-		if (!flagRemoveEditorMarker && !flagOptimizeNIF)
+		if (rotateAngleX != 0.0f || rotateAngleY != 0.0f || rotateAngleZ != 0.0f)
+			flagRotateShape = true;
+
+		if (scaleFactorX != 0.0f || scaleFactorY != 0.0f || scaleFactorZ != 0.0f)
+			flagScaleShape = true;
+
+		if (offsetDistanceX != 0.0f || offsetDistanceY != 0.0f || offsetDistanceZ != 0.0f)
+			flagOffsetShape = true;
+
+		if (!flagRemoveEditorMarker && !flagPrettySortBlocks && !flagTrimTexturesPath && 
+			!flagMirrorShapeX && !flagMirrorShapeY && !flagMirrorShapeZ && 
+			!flagRotateShape && !flagScaleShape && !flagOffsetShape &&
+			!flagOptimizeForSSE)
 		{
       		std::cout << "nothing to do. aborting.";
       		exit(1);
@@ -346,15 +426,52 @@ int main(int argc, char* argv[], char* const envp[])
 	NiHeader& hdr = nif.GetHeader();
 	NiVersion& version = hdr.GetVersion();
 	if (version.File() != 0x14020007 || version.User() != 12) {
-		printf("NiVersion file: 0x%08x user: %u stream: %u not supported\n", version.File(), version.User(), version.Stream());
+		std::cout << "file version not supported. aborting." << std::endl;
 		exit(1);
 	}
 
-	if (flagRemoveEditorMarker)
+	if (flagRemoveEditorMarker) {
+		std::cout << "removing editor markers..." << std::endl;
 		RemoveEditorMarker(nif);
+	}
 
-	if (flagOptimizeNIF)
-		OptimizeNIF(nif, flagIsHeadPart, !flagNoRemoveParallax, !flagNoCalcBounds);
+	if (flagPrettySortBlocks) {
+		std::cout << "pretty sorting blocks..." << std::endl;
+		nif.PrettySortBlocks();
+	}
+
+	if (flagTrimTexturesPath) {
+		std::cout << "trimming texture paths..." << std::endl;
+		nif.TrimTexturePaths();
+	}
+
+	if (flagMirrorShapeX || flagMirrorShapeY || flagMirrorShapeZ) {
+		std::cout << "mirroring shapes..." << std::endl;
+		MirrorShape(nif, flagMirrorShapeX, flagMirrorShapeY, flagMirrorShapeZ);
+	}
+
+	if (flagRotateShape) {
+		std::cout << "rotating shapes..." << std::endl;
+		RotateShape(nif, rotateAngleX, rotateAngleY, rotateAngleZ);
+	}
+
+	if (flagScaleShape) {
+		std::cout << "scaling shapes..." << std::endl;
+		ScaleShape(nif, scaleFactorX, scaleFactorY, scaleFactorZ);
+	}
+
+	if (flagOffsetShape) {
+		std::cout << "off-setting shapes..." << std::endl;
+		OffsetShape(nif, offsetDistanceX, offsetDistanceY, offsetDistanceZ);
+	}
+
+	if (flagOptimizeForSSE) {
+		std::cout << "optmizing for SSE..." << std::endl;
+		if(version.Stream() == 83)
+			OptimizeForSSE(nif, flagIsHeadPart, !flagNoRemoveParallax, !flagNoCalcBounds);
+		else
+			std::cout << "skipping optimization. File is already SSE." << std::endl;
+	}
 
 	nif.Save(o_filename);
 	return 0;
