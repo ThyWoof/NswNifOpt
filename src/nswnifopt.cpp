@@ -341,8 +341,8 @@ int main(int argc, char* argv[], char* const envp[])
   	}
 	catch (const cxxopts::OptionException& e) 
 	{
-    	std::cout << "error parsing options: " << e.what() << std::endl << std::endl << options.help() << std::endl;
-    	exit(1);
+		std::cout << "error parsing options: " << e.what() << std::endl << std::endl << options.help() << std::endl;
+		exit(1);
   	}
 
 	NifFile nif;	
