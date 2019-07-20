@@ -293,8 +293,8 @@ int main(int argc, char* argv[], char* const envp[])
 	bool flagRemoveEditorMarker = false;
 	bool flagOptimizeNIF = false;
 	bool flagIsHeadPart = false;
-	bool flagRemoveParallax = true;
-	bool flagCalcBounds = true;
+	bool flagNoRemoveParallax = false;
+	bool flagNoCalcBounds = false;
 
 	cxxopts::Options options(argv[0], "Zappastuff's Nintendo Switch Skyrim NIF optimizer");
 
@@ -307,6 +307,8 @@ int main(int argc, char* argv[], char* const envp[])
 				("remove-editor-marker", "Remove Editor Marker", cxxopts::value<bool>(flagRemoveEditorMarker))
 				("optimize-nif", "optimize NIFs", cxxopts::value<bool>(flagOptimizeNIF))				
 				("is-head-part", "NIF is a head part", cxxopts::value<bool>(flagIsHeadPart))
+				("no-remove-parallax", "don't remove parallax on NIF optimize", cxxopts::value<bool>(flagNoRemoveParallax))
+				("no-calc-bounds", "don't calc bounds on NIF optimize", cxxopts::value<bool>(flagNoCalcBounds))
 				("i,input", "input file", cxxopts::value<std::string>())
 				("o,output", "ouptput file", cxxopts::value<std::string>());
 
@@ -352,7 +354,7 @@ int main(int argc, char* argv[], char* const envp[])
 		RemoveEditorMarker(nif);
 
 	if (flagOptimizeNIF)
-		OptimizeNIF(nif, flagIsHeadPart, flagRemoveParallax, flagCalcBounds);
+		OptimizeNIF(nif, flagIsHeadPart, !flagNoRemoveParallax, !flagNoCalcBounds);
 
 	nif.Save(o_filename);
 	return 0;
