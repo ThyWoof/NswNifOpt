@@ -331,8 +331,6 @@ int main(int argc, char* argv[], char* const envp[])
 
 	std::cout << flagRemoveEditorMarker;
 
-	return 0;
-
 	NifFile nif;	
 	nif.Load(i_filename);
 
