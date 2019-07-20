@@ -21,7 +21,7 @@ Nintendo Switch Skyrim NIF Optimizer
 
 ```
 Usage:
-  \NswNifOpt\bin\nswnifopt.exe [OPTION...]
+  nswnifopt.exe [OPTION...]
 
       --remove-editor-marker  remove Editor Marker
       --pretty-sort-blocks    pretty sort blocks
@@ -42,6 +42,40 @@ Usage:
       --is-head-part          ONLY for parts like head, ear, mouth and hair
       --no-remove-parallax    don't remove parallax flags and meshes
       --no-calc-bounds        don't calculate new bounds spheres for meshes
+      --force-optimization    force optimization if NIF on SSE format
   -i, --input arg             input file
   -o, --output arg            ouptput file
 ```
+
+## Automation
+
+Create a batch file with this content (replace %% with % if copying and pasting directly to command prompt):
+
+```
+for /d %%F in ("<SOME_FOLDER_WITH_NIFS_IN_SUBFOLDERS>") go (
+  nswnifopt.exe -i "%%F" -o "%%F" <WHATEVER-MODIFICATION-PARAMETERS-YOU-FEEL-LIKE>
+)
+```
+
+## Examples
+
+- Optimize head part mesh
+
+  `nswnifopt.exe -i head.nif -o head.nif --optimize-for-sse -is-head-part`
+
+- Optimize regular mesh
+
+  `nswnifopt.exe -i standard.nif -o standard.nif --optimize-for-sse`
+
+- Apply Skyrim SSE standards to textures paths
+
+  `nswnifopt.exe -i standard.nif -o standard.nif --trim-textures-path`
+
+- Remove Editor Markers from Meshes as they create purple artifacts
+
+  `nswnifopt.exe -i standard.nif -o standard.nif --remove-editor-marker`
+
+- You can mix and match commands
+
+  `nswnifopt.exe -i standard.nif -o standard.nif --remove-editor-marker --optimize-for-sse --trim-textures-path`
+
