@@ -9,8 +9,13 @@ Nintendo Switch Skyrim NIF Optimizer
 
 ## Build (Visual Studio Code)
 
-1. Install https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017
-2. Install https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools (https://github.com/microsoft/vscode-cpptools)
+1. Install https://code.visualstudio.com
+2. Install https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017
+3. Install https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools (https://github.com/microsoft/vscode-cpptools)
+4. Open Visual Studio Developer Command Prompt
+5. Navigate to Project folder and run `code .`
+6. Adjust `.vscode/.c_cpp_properties.json` with correct CL path
+7. Build (Ctrl-Shift-B)
 
 ## Usage
 
@@ -20,7 +25,7 @@ Usage:
 
       --remove-editor-marker  remove Editor Marker
       --pretty-sort-blocks    pretty sort blocks
-      --trim-textures-path    pretty sort blocks
+      --trim-textures-path    trim textures path
       --mirror-shape-x        mirror shape over x axis
       --mirror-shape-y        mirror shape over y axis
       --mirror-shape-z        mirror shape over z axis

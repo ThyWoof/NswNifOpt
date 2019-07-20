@@ -1,5 +1,5 @@
 /*
-nswnifopt: remove editor markers and optimize for SSE.
+nswnifopt: command line to automate Skyrim SE NIF conversion
 Copyright (c) 2019 Thy Woof
 
 OptimizeForSSE function from https://github.com/ousnius/BodySlide-and-Outfit-Studio
@@ -324,11 +324,6 @@ int main(int argc, char* argv[], char* const envp[])
 	bool flagMirrorShapeY = false;
 	bool flagMirrorShapeZ = false;
 
-	bool flagOptimizeForSSE = false;
-	bool flagIsHeadPart = false;
-	bool flagNoRemoveParallax = false;
-	bool flagNoCalcBounds = false;
-
 	bool flagRotateShape = false;
 	float rotateAngleX = 0.0f;
 	float rotateAngleY = 0.0f;
@@ -344,6 +339,11 @@ int main(int argc, char* argv[], char* const envp[])
 	float offsetDistanceY = 0.0f;
 	float offsetDistanceZ = 0.0f;
 
+	bool flagOptimizeForSSE = false;
+	bool flagIsHeadPart = false;
+	bool flagNoRemoveParallax = false;
+	bool flagNoCalcBounds = false;
+
 	cxxopts::Options options(argv[0], "Zappastuff's Nintendo Switch Skyrim NIF optimizer");
 
 	try
@@ -354,7 +354,7 @@ int main(int argc, char* argv[], char* const envp[])
 			.add_options()
 				("remove-editor-marker", "remove Editor Marker", cxxopts::value<bool>(flagRemoveEditorMarker))
 				("pretty-sort-blocks", "pretty sort blocks", cxxopts::value<bool>(flagPrettySortBlocks))
-				("trim-textures-path", "pretty sort blocks", cxxopts::value<bool>(flagTrimTexturesPath))
+				("trim-textures-path", "trim textures path", cxxopts::value<bool>(flagTrimTexturesPath))
 
 				("mirror-shape-x", "mirror shape over x axis", cxxopts::value<bool>(flagMirrorShapeX))
 				("mirror-shape-y", "mirror shape over y axis", cxxopts::value<bool>(flagMirrorShapeY))
@@ -397,10 +397,7 @@ int main(int argc, char* argv[], char* const envp[])
 		if (offsetDistanceX != 0.0f || offsetDistanceY != 0.0f || offsetDistanceZ != 0.0f)
 			flagOffsetShape = true;
 
-		if (!flagRemoveEditorMarker && !flagPrettySortBlocks && !flagTrimTexturesPath && 
-			!flagMirrorShapeX && !flagMirrorShapeY && !flagMirrorShapeZ && 
-			!flagRotateShape && !flagScaleShape && !flagOffsetShape &&
-			!flagOptimizeForSSE)
+		if (!flagRemoveEditorMarker && !flagPrettySortBlocks && !flagTrimTexturesPath && !flagMirrorShapeX && !flagMirrorShapeY && !flagMirrorShapeZ && !flagRotateShape && !flagScaleShape && !flagOffsetShape && !flagOptimizeForSSE)
 		{
       		std::cout << "nothing to do. aborting.";
       		exit(1);
