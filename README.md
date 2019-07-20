@@ -18,10 +18,11 @@ Nintendo Switch Skyrim NIF Optimizer
 Usage:
   nswnifopt.exe [OPTION...]
 
-  -h, --help                  print help
       --remove-editor-marker  Remove Editor Marker
       --optimize-nif          optimize NIFs
       --is-head-part          NIF is a head part
+      --no-remove-parallax    don't remove parallax on NIF optimize
+      --no-calc-bounds        don't calc bounds on NIF optimize
   -i, --input arg             input file
   -o, --output arg            ouptput file
 ```
