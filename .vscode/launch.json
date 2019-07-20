@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+     "configurations": [
+
+         {
+             "name": "(msvc) Launch",
+             "type": "cppvsdbg",
+             "request": "launch",
+             "program": "${workspaceFolder}/bin/nswnifopt.exe",
+             "args": [
+                 "--remove-editor-marker",
+                 "-i",
+                 "${workspaceFolder}/samples/input.nif",
+                 "-o",
+                 "${workspaceFolder}/samples/output.nif"
+             ],
+             "stopAtEntry": true,
+             "cwd": "${workspaceFolder}",
+             "environment": [],
+             "externalConsole": false
+         }
+     ]
+ }

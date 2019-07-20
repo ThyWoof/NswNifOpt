@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "msvc build",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [
+                "/EHsc",
+                "/Zi",
+                "/Foobj\\",
+                "/Fe:",
+                "bin\\nswnifopt.exe",
+                "src\\nswnifopt.cpp",
+                "lib\\NIF\\utils\\*.cpp",
+                "lib\\NIF\\*.cpp"
+            ],
+            "group":  {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal":"always"
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
