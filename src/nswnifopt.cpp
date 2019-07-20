@@ -287,6 +287,11 @@ void OptimizeNIF(NifFile& nif, bool headParts = false, bool removeParallax = tru
 	return;
 }
 
+inline bool isFileValid(const std::string& name) {
+  struct stat buffer;   
+  return (stat (name.c_str(), &buffer) == 0); 
+}
+
 int main(int argc, char* argv[], char* const envp[])
 {
 
@@ -298,14 +303,14 @@ int main(int argc, char* argv[], char* const envp[])
 	bool flagRemoveParallax = true;
 	bool flagCalcBounds = true;
 
+	cxxopts::Options options(argv[0], "Zappastuff's Nintendo Switch Skyrim NIF optimizer");
+
 	try
 	{
-		cxxopts::Options options(argv[0], "Zappastuff's Nintendo Switch Skyrim NIF optimizer");
 		options
 			.positional_help("[optional args]")
       		.show_positional_help()
 			.add_options()
-				("h,help", "print help")
 				("remove-editor-marker", "Remove Editor Marker", cxxopts::value<bool>(flagRemoveEditorMarker))
 				("optimize-nif", "optimize NIFs", cxxopts::value<bool>(flagOptimizeNIF))				
 				("is-head-part", "NIF is a head part", cxxopts::value<bool>(flagIsHeadPart))
@@ -314,18 +319,29 @@ int main(int argc, char* argv[], char* const envp[])
 
 		auto result = options.parse(argc, argv);
 
-	    if (result.count("help") || !result.count("input") || !result.count("output"))
+	    if (!result.count("input") || !result.count("output"))
     	{
-      		std::cout << options.help({"", "Group"}) << std::endl;
-      		exit(0);
+      		std::cout << options.help() << std::endl;
+      		exit(1);
     	}
+
+		if (!flagRemoveEditorMarker && !flagOptimizeNIF)
+		{
+      		std::cout << "nothing to do. aborting.";
+      		exit(1);
+		}
 
 		i_filename = result["input"].as<std::string>();
 		o_filename = result["output"].as<std::string>();
+
+		if (!isFileValid(i_filename)) {
+			std::cout << "input file doesn't exist. aborting.";
+			exit(1);
+		}
   	}
 	catch (const cxxopts::OptionException& e) 
 	{
-    	std::cout << "error parsing options: " << e.what() << std::endl;
+    	std::cout << "error parsing options: " << e.what() << std::endl << std::endl << options.help() << std::endl;
     	exit(1);
   	}
 
@@ -336,10 +352,9 @@ int main(int argc, char* argv[], char* const envp[])
 	NiVersion& version = hdr.GetVersion();
 	if (version.File() != 0x14020007 || version.User() != 12) {
 		printf("NiVersion file: 0x%08x user: %u stream: %u not supported\n", version.File(), version.User(), version.Stream());
-		return 1;
+		exit(1);
 	}
 
-	bool changed;
 	if (flagRemoveEditorMarker)
 		RemoveEditorMarker(nif);
 
