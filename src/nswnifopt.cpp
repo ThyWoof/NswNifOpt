@@ -21,21 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "..\lib\cxxopts\cxxopts.hpp"
 #include "..\lib\NIF\NifFile.h"
 
-bool RemoveEditorMarker(NifFile& nif)
+void RemoveEditorMarker(NifFile& nif)
 {
-	bool changed = false;
-
 	for (auto &shape : nif.GetShapes()) {
 		std::string shapeName = shape->GetName();
 
 		if (shapeName == "EditorMarker") {
 			printf("Found an editor marker. Deleting...\n");
 			nif.DeleteShape(shape);
-			changed = true;
 		}
 	}
-	
-	return changed;
 }
 
 void OptimizeNIF(NifFile& nif, bool headParts = false, bool removeParallax = true, bool calcBounds = true)
@@ -283,8 +278,6 @@ void OptimizeNIF(NifFile& nif, bool headParts = false, bool removeParallax = tru
 	// For files without a root node, remove the leftover data blocks anyway
 	hdr.DeleteBlockByType("NiTriStripsData", true);
 	hdr.DeleteBlockByType("NiTriShapeData", true);
-
-	return;
 }
 
 inline bool isFileValid(const std::string& name) {
