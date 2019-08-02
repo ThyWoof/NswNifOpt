@@ -39,8 +39,8 @@ struct NifLoadOptions {
 };
 
 struct NifSaveOptions {
-	bool optimize = true;
-	bool sortBlocks = true;
+	bool optimize = false;
+	bool sortBlocks = false;
 };
 
 class NifFile {
